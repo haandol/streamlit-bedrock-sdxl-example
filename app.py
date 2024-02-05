@@ -92,14 +92,13 @@ if __name__ == "__main__":
     if not prompt:
         prompt = add_selectbox
 
-    print(prompt)
     if prompt:
-        st.markdown(
-            f"""
-        This will show an image using **stable diffusion** of the desired {prompt} entered:
-        """
-        )
+        st.markdown(f"""
+This will show an image using **stable diffusion** 
+of the desired {prompt} entered:
+        """.strip())
         print(prompt)
+
         image = None
         with st.spinner("Generating image based on prompt"):
             sd = ImageGenerator()
