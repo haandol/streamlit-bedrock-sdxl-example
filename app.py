@@ -12,6 +12,7 @@ load_dotenv()
 
 SEED = int(os.environ.get("SEED", 329))
 MODEL_ID = os.environ.get("MODEL_ID", "stability.stable-diffusion-xl-v1")
+SAVE_LOCAL = bool(os.environ.get("SAVE_LOCAL", None))
 
 
 class ImageGenerator:
@@ -31,7 +32,6 @@ class ImageGenerator:
         clip_guidance_preset: str = "FAST_GREEN",
         style_preset: str = "photographic",
         width: int = 1024,
-        save_location="prompt.jpg",
     ):
         body = json.dumps(
             {
@@ -60,7 +60,9 @@ class ImageGenerator:
         image = Image.open(
             io.BytesIO(base64.decodebytes(bytes(base_64_img_str, "utf-8")))
         )
-        image.save(save_location)
+        if SAVE_LOCAL:
+            filename = f"{prompt.replace(' ', '_')}-{SEED}.png"
+            image.save(filename)
         return image
 
     def __str__(self) -> str:
