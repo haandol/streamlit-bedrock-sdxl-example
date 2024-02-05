@@ -15,6 +15,12 @@ install the required packages using the following command:
 $ pip install -r requirements.txt
 ```
 
+copy [dev.env](/env/dev.env) to `.env` and fill in the required values.
+
+```bash
+$ cp env/dev.env .env
+```
+
 # Run
 
 ```bash

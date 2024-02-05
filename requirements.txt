@@ -1,3 +1,4 @@
 streamlit
 Pillow
 boto3
+python-dotenv
