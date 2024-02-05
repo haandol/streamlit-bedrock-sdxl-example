@@ -95,10 +95,12 @@ if __name__ == "__main__":
         prompt = add_selectbox
 
     if prompt:
-        st.markdown(f"""
+        st.markdown(
+            f"""
 This will show an image using **stable diffusion** 
 of the desired {prompt} entered:
-        """.strip())
+        """.strip()
+        )
         print(prompt)
 
         image = None
@@ -107,10 +109,14 @@ of the desired {prompt} entered:
             image = sd.generate_image_from_prompt(
                 prompt=prompt,
                 negative_prompts=[
-                    "poorly rendered",
-                    "poor background details",
-                    "poorly drawn mountains",
-                    "disfigured mountain features",
+                    'ugly,', 'tiling,', 'poorly', 'drawn', 'hands,',
+                    'poorly', 'drawn', 'feet,', 'poorly', 'drawn',
+                    'face,', 'out', 'of', 'frame,', 'extra', 'limbs,',
+                    'disfigured,', 'deformed,', 'body', 'out', 'of',
+                    'frame,', 'bad', 'anatomy,', 'watermark,', 'signature,',
+                    'cut', 'off,', 'low', 'contrast,', 'underexposed,',
+                    'overexposed,', 'bad', 'art,', 'beginner,', 'amateur,',
+                    'distorted', 'face'
                 ],
             )
             st.success("Generated stable diffusion model")
