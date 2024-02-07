@@ -32,10 +32,10 @@ class ImageGenerator:
         self,
         prompt: str,
         negative_prompts: str,
-        cfg_scale: int = 5,
+        cfg_scale: int = 7.5,
         steps: int = 50,
         sampler: str = "K_DPMPP_2S_ANCESTRAL",
-        clip_guidance_preset: str = "FAST_GREEN",
+        clip_guidance_preset: str = "FAST_GREEN", # CLIP Guidance only supports ancestral samplers.
         style_preset: str = "photographic",
         width: int = 1024,
     ):
