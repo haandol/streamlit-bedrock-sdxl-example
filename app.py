@@ -33,8 +33,8 @@ class ImageGenerator:
         prompt: str,
         negative_prompts: str,
         cfg_scale: int = 5,
-        steps: int = 30,
-        sampler: str = "K_DPMPP_2M",
+        steps: int = 50,
+        sampler: str = "K_DPMPP_2S_ANCESTRAL",
         clip_guidance_preset: str = "FAST_GREEN",
         style_preset: str = "photographic",
         width: int = 1024,
@@ -96,12 +96,15 @@ class Translator(object):
             print('text is in English')
             return text
 
-        response = self.client.translate_text(
-            Text=text,
-            SourceLanguageCode="auto",
-            TargetLanguageCode=target_language,
-        )
-        return response.get("TranslatedText")
+        L = []
+        for el in text.split(','):
+            response = self.client.translate_text(
+                Text=el.strip(),
+                SourceLanguageCode="auto",
+                TargetLanguageCode=target_language,
+            )
+            L.append(response.get("TranslatedText", ''))
+        return ', '.join(L)
 
 
 if __name__ == "__main__":
