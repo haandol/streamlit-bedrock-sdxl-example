@@ -1,4 +1,5 @@
 import io
+import re
 import os
 import json
 import base64
@@ -10,6 +11,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+PROFILE_NAME = os.environ.get("AWS_PROFILE", None)
+REGION_NAME = os.environ.get("AWS_REGION", "us-east-1")
+
 SEED = int(os.environ.get("SEED", 329))
 MODEL_ID = os.environ.get("MODEL_ID", "stability.stable-diffusion-xl-v1")
 SAVE_LOCAL = bool(os.environ.get("SAVE_LOCAL", None))
@@ -17,9 +21,11 @@ SAVE_LOCAL = bool(os.environ.get("SAVE_LOCAL", None))
 
 class ImageGenerator:
     def __init__(self):
-        profile_name = os.environ.get("AWS_PROFILE", None)
-        region_name = os.environ.get("AWS_REGION", "us-east-1")
-        session = boto3.Session(profile_name=profile_name, region_name=region_name)
+        session = boto3.Session(
+            profile_name=PROFILE_NAME,
+            region_name=REGION_NAME,
+        )
+        self.client = session.client("bedrock-runtime")
         self.client = session.client("bedrock-runtime")
 
     def generate_image_from_prompt(
@@ -72,7 +78,36 @@ class ImageGenerator:
         return len(self.prompt)
 
 
+class Translator(object):
+    def __init__(self):
+        session = boto3.Session(
+            profile_name=PROFILE_NAME,
+            region_name=REGION_NAME,
+        )
+        self.pattern = re.compile(r'[^a-zA-Z0-9 ,.]+')
+        self.client = session.client(service_name='translate')
+
+    def translate(self, text: str, target_language: str = "en") -> str:
+        if text is None:
+            return ""
+        
+        # if text doescontains only English letters, return as is
+        if not self.pattern.search(text):
+            print('text is in English')
+            return text
+
+        response = self.client.translate_text(
+            Text=text,
+            SourceLanguageCode="auto",
+            TargetLanguageCode=target_language,
+        )
+        return response.get("TranslatedText")
+
+
 if __name__ == "__main__":
+    sdxl = ImageGenerator()
+    translator = Translator()
+
     st.title("SDXL Demo using Amazon Bedrock")
     st.caption("An app to generate images based on text prompts :sunglasses:")
     with st.sidebar:
@@ -95,18 +130,19 @@ if __name__ == "__main__":
         prompt = add_selectbox
 
     if prompt:
+        print('source: ', prompt)
+        prompt = translator.translate(prompt)
         st.markdown(
             f"""
 This will show an image using **stable diffusion** 
 of the desired {prompt} entered:
         """.strip()
         )
-        print(prompt)
+        print('translated: ', prompt)
 
         image = None
         with st.spinner("Generating image based on prompt"):
-            sd = ImageGenerator()
-            image = sd.generate_image_from_prompt(
+            image = sdxl.generate_image_from_prompt(
                 prompt=prompt,
                 negative_prompts=[
                     'ugly,', 'tiling,', 'poorly', 'drawn', 'hands,',
