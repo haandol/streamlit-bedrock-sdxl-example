@@ -97,14 +97,14 @@ class Translator(object):
             return text
 
         L = []
-        for el in text.split(','):
+        for t in text.split(','):
             response = self.client.translate_text(
-                Text=el.strip(),
+                Text=t.strip(),
                 SourceLanguageCode="auto",
                 TargetLanguageCode=target_language,
             )
             L.append(response.get("TranslatedText", ''))
-        return ', '.join(L)
+        return ', '.join(filter(None, L))
 
 
 if __name__ == "__main__":
