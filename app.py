@@ -30,6 +30,7 @@ class ImageGenerator:
         self.universal_positive_prompts = [
             "4k",
             "8k",
+            "masterpiece",
             "highly detailed",
             "high resolution",
         ]
