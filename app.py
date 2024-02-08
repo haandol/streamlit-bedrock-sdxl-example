@@ -71,7 +71,7 @@ class ImageGenerator:
     def generate_image_from_prompt(
         self,
         prompt: str,
-        negative_prompts: List[str],
+        negative_prompts: List[str] = [],
         cfg_scale: int = 7.5,
         steps: int = 50,
         sampler: str = "K_DPMPP_2S_ANCESTRAL",
@@ -160,7 +160,7 @@ if __name__ == "__main__":
             (
                 "",
                 "A beautiful mountain landscape",
-                "헤드폰을 쓰고 있는 모나리자",  # "Mona Lisa wearing headphones",
+                "화성에서 검은 말을 타고 있는 우주인",
                 "スキューバダイビングスーツを着たモデル",  # "A model wearing a scuba diving suit",
             ),
             index=0,
