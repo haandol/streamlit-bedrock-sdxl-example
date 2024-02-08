@@ -27,45 +27,38 @@ class ImageGenerator:
             region_name=REGION_NAME,
         )
         self.client = session.client("bedrock-runtime")
+        self.universal_positive_prompts = [
+            "4k",
+            "8k",
+            "highly detailed",
+            "high resolution",
+        ]
         self.universal_negative_prompts = [
-            "ugly,",
-            "tiling,",
-            "poorly",
-            "drawn",
-            "hands,",
-            "poorly",
-            "drawn",
-            "feet,",
-            "poorly",
-            "drawn",
-            "face,",
-            "out",
-            "of",
-            "frame,",
-            "extra",
-            "limbs,",
-            "disfigured,",
-            "deformed,",
-            "body",
-            "out",
-            "of",
-            "frame,",
-            "bad",
-            "anatomy,",
-            "watermark,",
-            "signature,",
-            "cut",
-            "off,",
-            "low",
-            "contrast,",
-            "underexposed,",
-            "overexposed,",
-            "bad",
-            "art,",
-            "beginner,",
-            "amateur,",
-            "distorted",
-            "face",
+            "ugly",
+            "tiling",
+            "poorly drawn hands",
+            "poorly drawn feet",
+            "poorly drawn face",
+            "out of frame",
+            "extra limbs",
+            "disfigured",
+            "deformed",
+            "body out of frame",
+            "bad anatomy",
+            "watermark",
+            "signature",
+            "cut off",
+            "low contrast",
+            "underexposed",
+            "overexposed",
+            "bad art",
+            "beginner",
+            "amateur",
+            "distorted face",
+            "sketch",
+            "doodle",
+            "blurry",
+            "out of focus",
         ]
 
     def generate_image_from_prompt(
@@ -73,8 +66,8 @@ class ImageGenerator:
         prompt: str,
         negative_prompts: List[str] = [],
         cfg_scale: int = 7.5,
-        steps: int = 50,
-        sampler: str = "K_DPMPP_2S_ANCESTRAL",
+        steps: int = 30,
+        sampler: str = "K_DPMPP_2M",
         clip_guidance_preset: str = "FAST_GREEN",  # CLIP Guidance only supports ancestral samplers.
         style_preset: str = "photographic",
         width: int = 1024,
@@ -82,7 +75,14 @@ class ImageGenerator:
         body = json.dumps(
             {
                 "text_prompts": (
-                    [{"text": prompt, "weight": 1.0}]
+                    [
+                        {
+                            "text": prompt
+                            + ", "
+                            + ", ".join(self.universal_positive_prompts),
+                            "weight": 1.0,
+                        }
+                    ]
                     + [
                         {"text": negprompt, "weight": -1.0}
                         for negprompt in self.universal_negative_prompts
