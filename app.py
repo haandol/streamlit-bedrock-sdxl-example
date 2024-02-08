@@ -175,8 +175,12 @@ if __name__ == "__main__":
         orig_prompt = prompt
         print("original prompt: ", orig_prompt)
         prompt = translator.translate(orig_prompt)
-        st.markdown(f" User prompted: `{orig_prompt}` => `{prompt}`".strip())
-        print("translated: ", prompt)
+        if orig_prompt == prompt:
+            st.markdown(f"User prompted: `{prompt}`".strip())
+            print("prompt is already in English")
+        else:
+            st.markdown(f"User prompted: `{orig_prompt}` => `{prompt}`".strip())
+            print("translated: ", prompt)
 
         image = None
         with st.spinner("Generating image based on prompt"):
