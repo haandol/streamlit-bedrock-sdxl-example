@@ -6,6 +6,7 @@ import base64
 
 import boto3
 import streamlit as st
+from typing import List
 from PIL import Image
 from dotenv import load_dotenv
 
@@ -26,16 +27,55 @@ class ImageGenerator:
             region_name=REGION_NAME,
         )
         self.client = session.client("bedrock-runtime")
-        self.client = session.client("bedrock-runtime")
+        self.universal_negative_prompts = [
+            "ugly,",
+            "tiling,",
+            "poorly",
+            "drawn",
+            "hands,",
+            "poorly",
+            "drawn",
+            "feet,",
+            "poorly",
+            "drawn",
+            "face,",
+            "out",
+            "of",
+            "frame,",
+            "extra",
+            "limbs,",
+            "disfigured,",
+            "deformed,",
+            "body",
+            "out",
+            "of",
+            "frame,",
+            "bad",
+            "anatomy,",
+            "watermark,",
+            "signature,",
+            "cut",
+            "off,",
+            "low",
+            "contrast,",
+            "underexposed,",
+            "overexposed,",
+            "bad",
+            "art,",
+            "beginner,",
+            "amateur,",
+            "distorted",
+            "face",
+        ]
 
     def generate_image_from_prompt(
         self,
         prompt: str,
-        negative_prompts: str,
+        negative_prompts: List[str],
         cfg_scale: int = 7.5,
         steps: int = 50,
         sampler: str = "K_DPMPP_2S_ANCESTRAL",
-        clip_guidance_preset: str = "FAST_GREEN", # CLIP Guidance only supports ancestral samplers.
+        clip_guidance_preset: str = "FAST_GREEN",  # CLIP Guidance only supports ancestral samplers.
         style_preset: str = "photographic",
         width: int = 1024,
     ):
@@ -45,7 +85,8 @@ class ImageGenerator:
                     [{"text": prompt, "weight": 1.0}]
                     + [
                         {"text": negprompt, "weight": -1.0}
-                        for negprompt in negative_prompts
+                        for negprompt in self.universal_negative_prompts
+                        + negative_prompts
                     ]
                 ),
                 "seed": SEED,
@@ -84,27 +125,27 @@ class Translator(object):
             profile_name=PROFILE_NAME,
             region_name=REGION_NAME,
         )
-        self.pattern = re.compile(r'[^a-zA-Z0-9 ,.]+')
-        self.client = session.client(service_name='translate')
+        self.pattern = re.compile(r"[^a-zA-Z0-9 ,.]+")
+        self.client = session.client(service_name="translate")
 
     def translate(self, text: str, target_language: str = "en") -> str:
         if text is None:
             return ""
-        
+
         # if text doescontains only English letters, return as is
         if not self.pattern.search(text):
-            print('text is in English')
+            print("text is in English")
             return text
 
         L = []
-        for t in text.split(','):
+        for t in text.split(","):
             response = self.client.translate_text(
                 Text=t.strip(),
                 SourceLanguageCode="auto",
                 TargetLanguageCode=target_language,
             )
-            L.append(response.get("TranslatedText", ''))
-        return ', '.join(filter(None, L))
+            L.append(response.get("TranslatedText", ""))
+        return ", ".join(filter(None, L))
 
 
 if __name__ == "__main__":
@@ -119,10 +160,8 @@ if __name__ == "__main__":
             (
                 "",
                 "A beautiful mountain landscape",
-                "Homer Simpson on a computer wearing a space suit",
-                "Mona Lisa with headphones on",
-                "A model wearing a scuba diving suit",
-                "Optimus Prime on top of a surf board",
+                "헤드폰을 쓰고 있는 모나리자",  # "Mona Lisa wearing headphones",
+                "スキューバダイビングスーツを着たモデル",  # "A model wearing a scuba diving suit",
             ),
             index=0,
         )
@@ -133,30 +172,15 @@ if __name__ == "__main__":
         prompt = add_selectbox
 
     if prompt:
-        print('source: ', prompt)
+        print("source: ", prompt)
         prompt = translator.translate(prompt)
-        st.markdown(
-            f"""
-This will show an image using **stable diffusion** 
-of the desired {prompt} entered:
-        """.strip()
-        )
-        print('translated: ', prompt)
+        st.markdown(f" User prompted: `{prompt}`".strip())
+        print("translated: ", prompt)
 
         image = None
         with st.spinner("Generating image based on prompt"):
             image = sdxl.generate_image_from_prompt(
                 prompt=prompt,
-                negative_prompts=[
-                    'ugly,', 'tiling,', 'poorly', 'drawn', 'hands,',
-                    'poorly', 'drawn', 'feet,', 'poorly', 'drawn',
-                    'face,', 'out', 'of', 'frame,', 'extra', 'limbs,',
-                    'disfigured,', 'deformed,', 'body', 'out', 'of',
-                    'frame,', 'bad', 'anatomy,', 'watermark,', 'signature,',
-                    'cut', 'off,', 'low', 'contrast,', 'underexposed,',
-                    'overexposed,', 'bad', 'art,', 'beginner,', 'amateur,',
-                    'distorted', 'face'
-                ],
             )
             st.success("Generated stable diffusion model")
 
