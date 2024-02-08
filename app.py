@@ -172,9 +172,10 @@ if __name__ == "__main__":
         prompt = add_selectbox
 
     if prompt:
-        print("source: ", prompt)
-        prompt = translator.translate(prompt)
-        st.markdown(f" User prompted: `{prompt}`".strip())
+        orig_prompt = prompt
+        print("original prompt: ", orig_prompt)
+        prompt = translator.translate(orig_prompt)
+        st.markdown(f" User prompted: `{orig_prompt}` => `{prompt}`".strip())
         print("translated: ", prompt)
 
         image = None
