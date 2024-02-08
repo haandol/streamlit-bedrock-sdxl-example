@@ -167,7 +167,7 @@ if __name__ == "__main__":
         )
         st.markdown("Use the above drop down box to generate _prompt_ examples")
 
-    prompt = st.text_input("Input the prompt desired")
+    prompt = st.text_input("Input the prompt or select one from the left sidebar")
     if not prompt:
         prompt = add_selectbox
 
