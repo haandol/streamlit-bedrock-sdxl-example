@@ -2,3 +2,4 @@ streamlit
 Pillow
 boto3
 python-dotenv
+streamlit-drawable-canvas
