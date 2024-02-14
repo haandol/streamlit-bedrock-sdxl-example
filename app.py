@@ -6,7 +6,7 @@ import base64
 
 import boto3
 import streamlit as st
-from typing import List
+from typing import List, Optional
 from PIL import Image
 from dotenv import load_dotenv
 
@@ -18,6 +18,16 @@ REGION_NAME = os.environ.get("AWS_REGION", "us-east-1")
 SEED = int(os.environ.get("SEED", 329))
 MODEL_ID = os.environ.get("MODEL_ID", "stability.stable-diffusion-xl-v1")
 SAVE_LOCAL = bool(os.environ.get("SAVE_LOCAL", None))
+
+LATEST_IMAGE_KEY = "latest_image"
+
+
+def set_latest_image(image: Image.Image):
+    st.session_state[LATEST_IMAGE_KEY] = image
+
+
+def get_latest_image() -> Optional[Image.Image]:
+    return st.session_state.get("latest_image", None)
 
 
 class ImageGenerator:
@@ -149,12 +159,10 @@ class Translator(object):
         return ", ".join(filter(None, L))
 
 
-if __name__ == "__main__":
+def txt2img_tab():
     sdxl = ImageGenerator()
     translator = Translator()
 
-    st.title("SDXL Demo using Amazon Bedrock")
-    st.caption("An app to generate images based on text prompts :sunglasses:")
     with st.sidebar:
         add_selectbox = st.sidebar.selectbox(
             "Prompt examples",
@@ -169,10 +177,13 @@ if __name__ == "__main__":
         st.markdown("Use the above drop down box to generate _prompt_ examples")
 
     prompt = st.text_input("Input the prompt or select one from the left sidebar")
-    if not prompt:
-        prompt = add_selectbox
 
-    if prompt:
+    if st.button("Generate image", key="txt2img-btn"):
+        prompt = prompt or add_selectbox
+        if not prompt:
+            st.error("Please input a prompt or select one from the left sidebar")
+            return
+
         orig_prompt = prompt
         print("original prompt: ", orig_prompt)
         prompt = translator.translate(orig_prompt)
@@ -183,12 +194,30 @@ if __name__ == "__main__":
             st.markdown(f"User prompted: `{orig_prompt}` => `{prompt}`".strip())
             print("translated: ", prompt)
 
-        image = None
         with st.spinner("Generating image based on prompt"):
             image = sdxl.generate_image_from_prompt(
                 prompt=prompt,
             )
+            set_latest_image(image.copy())
             st.success("Generated stable diffusion model")
+        st.image(image)
 
-        if image:
-            st.image(image)
+
+def inpainting_tab():
+    image = get_latest_image()
+    if image is None:
+        st.error("Please generate an image first.")
+        return
+
+    st.image(image)
+
+
+if __name__ == "__main__":
+    st.title("SDXL Demo using Amazon Bedrock")
+    st.caption("An app to generate images based on text prompts :sunglasses:")
+
+    tab1, tab2 = st.tabs(["Text to Image", "Inpainting"])
+    with tab1:
+        txt2img_tab()
+    with tab2:
+        inpainting_tab()
