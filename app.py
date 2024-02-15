@@ -24,11 +24,12 @@ LATEST_IMAGE_KEY = "latest_image"
 
 
 def set_latest_image(image: Image.Image):
-    st.session_state[LATEST_IMAGE_KEY] = image
+    if LATEST_IMAGE_KEY not in st.session_state:
+        st.session_state[LATEST_IMAGE_KEY] = image
 
 
 def get_latest_image() -> Optional[Image.Image]:
-    return st.session_state.get("latest_image", None)
+    return st.session_state.get(LATEST_IMAGE_KEY, None)
 
 
 class ImageGenerator:
@@ -249,8 +250,9 @@ def txt2img_tab(sdxl: ImageGenerator = None, translator: Translator = None):
                 filename = f"{prompt.replace(' ', '_')}-{SEED}.png"
                 image.save(filename)
             set_latest_image(image.copy())
-            st.success("Generated stable diffusion model")
+            st.success("Generated image based on prompt")
     if image:
+        st.subheader("Generated image")
         st.image(image)
 
 
@@ -263,6 +265,7 @@ def inpainting(image: Image.Image) -> Optional[Image.Image]:
         step=1,
         key="inpainting-brush",
     )
+    st.subheader("Draw on the image to mask the area to inpaint")
     canvas_result = st_canvas(
         stroke_width=brush_size,
         stroke_color="black",
@@ -279,9 +282,7 @@ def inpainting(image: Image.Image) -> Optional[Image.Image]:
     mask = canvas_result.image_data
     mask = mask[:, :, -1] > 0
     if mask.sum() > 0:
-        mask = Image.fromarray(mask)
-        st.image(mask)
-        return mask
+        return Image.fromarray(mask)
 
     return None
 
@@ -293,7 +294,9 @@ def inpainting_tab(sdxl: ImageGenerator = None, translator: Translator = None):
         return
 
     mask_image = inpainting(init_image)
-    print("after inpainting: ", init_image, mask_image)
+    if mask_image:
+        st.subheader("Masked area")
+        st.image(mask_image)
 
     image_strength = st.slider(
         "Strength of inpainting (1.0 essentially ignores the masked area of the original input image)",
@@ -306,7 +309,7 @@ def inpainting_tab(sdxl: ImageGenerator = None, translator: Translator = None):
 
     prompt = st.text_input("Input the prompt", key="inpainting-prompt")
 
-    if st.button("Generate image", key="inpainting-btn"):
+    if st.button("Generate inpainted image", key="inpainting-btn"):
         if not prompt:
             st.error("Please input a prompt or select one from the left sidebar")
             return
@@ -321,14 +324,14 @@ def inpainting_tab(sdxl: ImageGenerator = None, translator: Translator = None):
             st.markdown(f"User prompted: `{orig_prompt}` => `{prompt}`".strip())
             print("translated: ", prompt)
 
-        with st.spinner("Generating image..."):
+        with st.spinner("Generating inpainted image..."):
             image = sdxl.generate_image_from_prompt_and_mask_image(
                 prompt=prompt,
                 init_image=init_image,
                 mask_image=mask_image,
                 image_strength=image_strength,
             )
-            st.success("Generated stable diffusion model")
+            st.success("Generated inpainted image")
         st.image(image)
 
 
