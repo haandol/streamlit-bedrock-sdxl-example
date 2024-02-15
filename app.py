@@ -220,25 +220,13 @@ class Translator(object):
 
 
 def txt2img_tab(sdxl: ImageGenerator = None, translator: Translator = None):
-    with st.sidebar:
-        add_selectbox = st.sidebar.selectbox(
-            "Prompt examples",
-            (
-                "",
-                "A beautiful mountain landscape",
-                "화성에서 검은 말을 타고 있는 우주인",
-                "スキューバダイビングスーツを着たモデル",  # "A model wearing a scuba diving suit",
-            ),
-            index=0,
-        )
-        st.markdown("Use the above drop down box to generate _prompt_ examples")
-
     prompt = st.text_input(
         "Input the prompt or select one from the left sidebar", key="txt2img-prompt"
     )
 
+    image = get_latest_image()
     if st.button("Generate image", key="txt2img-btn"):
-        prompt = prompt or add_selectbox
+        prompt = prompt or st.session_state.get("selectbox", None)
         if not prompt:
             st.error("Please input a prompt or select one from the left sidebar")
             return
@@ -262,6 +250,7 @@ def txt2img_tab(sdxl: ImageGenerator = None, translator: Translator = None):
                 image.save(filename)
             set_latest_image(image.copy())
             st.success("Generated stable diffusion model")
+    if image:
         st.image(image)
 
 
@@ -310,7 +299,7 @@ def inpainting_tab(sdxl: ImageGenerator = None, translator: Translator = None):
         "Strength of inpainting (1.0 essentially ignores the masked area of the original input image)",
         min_value=0.0,
         max_value=1.0,
-        value=0.35,
+        value=0.3,
         step=0.05,
         key="inpainting-strength",
     )
@@ -339,7 +328,6 @@ def inpainting_tab(sdxl: ImageGenerator = None, translator: Translator = None):
                 mask_image=mask_image,
                 image_strength=image_strength,
             )
-            set_latest_image(image.copy())
             st.success("Generated stable diffusion model")
         st.image(image)
 
@@ -351,8 +339,24 @@ if __name__ == "__main__":
     sdxl = ImageGenerator()
     translator = Translator()
 
+    with st.sidebar:
+        st.sidebar.selectbox(
+            "Prompt examples",
+            (
+                "",
+                "A beautiful mountain landscape",
+                "화성에서 검은 말을 타고 있는 우주인",
+                "スキューバダイビングスーツを着たモデル",  # "A model wearing a scuba diving suit",
+            ),
+            index=0,
+            key="selectbox",
+        )
+        st.markdown("Use the above drop down box to generate _prompt_ examples")
+
     st.header("Text to Image")
     txt2img_tab(sdxl=sdxl, translator=translator)
+
     st.divider()
+
     st.header("Inpainting")
     inpainting_tab(sdxl=sdxl, translator=translator)
