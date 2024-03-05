@@ -105,6 +105,9 @@ class ImageGenerator:
         image = Image.open(
             io.BytesIO(base64.decodebytes(bytes(base_64_img_str, "utf-8")))
         )
+        if self.save_local:
+            filename = f"{prompt.replace(' ', '_')}-{self.seed}-init.jpg"
+            image.save(filename)
         return image
 
     def generate_image_from_prompt_and_mask_image(
@@ -165,7 +168,7 @@ class ImageGenerator:
             io.BytesIO(base64.decodebytes(bytes(base_64_img_str, "utf-8")))
         )
         if self.save_local:
-            filename = f"{prompt.replace(' ', '_')}-{self.seed}.png"
+            filename = f"{prompt.replace(' ', '_')}-{self.seed}-inpainting.jpg"
             image.save(filename)
         return image
 

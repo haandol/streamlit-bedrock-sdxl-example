@@ -141,9 +141,6 @@ def inpainting_section(init_image: Optional[Image.Image] = None):
                 mask_image=mask_image,
                 image_strength=image_strength,
             )
-        if SAVE_LOCAL:
-            filename = f"mask_image.png"
-            mask_image.save(filename)
         set_inpainted_image(image.copy())
 
 
