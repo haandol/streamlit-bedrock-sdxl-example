@@ -3,3 +3,4 @@ Pillow
 boto3
 python-dotenv
 streamlit-drawable-canvas
+streamlit-image-comparison

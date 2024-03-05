@@ -3,6 +3,7 @@ from typing import Optional
 
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
+from streamlit_image_comparison import image_comparison
 from PIL import Image
 from dotenv import load_dotenv
 
@@ -172,6 +173,6 @@ if __name__ == "__main__":
 
     inpainting_section(init_image)
     inpainted_image = get_inpainted_image()
-    if inpainted_image:
+    if init_image and inpainted_image:
         st.subheader("Inpainted image")
-        st.image(inpainted_image)
+        image_comparison(img1=init_image, img2=inpainted_image)
