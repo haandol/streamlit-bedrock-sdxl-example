@@ -97,9 +97,10 @@ def inpainting(image: Image.Image) -> Optional[Image.Image]:
     return None
 
 
-def inpainting_section(init_image: Optional[Image.Image] = None):
+def inpainting_section():
     st.header("Inpainting")
 
+    init_image = get_init_image()
     if not init_image:
         st.error("Please generate an image first")
         return
@@ -109,14 +110,25 @@ def inpainting_section(init_image: Optional[Image.Image] = None):
         st.subheader("Masked area")
         st.image(mask_image)
 
-    image_strength = st.slider(
-        "Strength of inpainting (1.0 essentially ignores the masked area of the original input image)",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.3,
-        step=0.01,
-        key="inpainting-strength",
-    )
+    col1, col2 = st.columns(2)
+    with col1:
+        image_strength = st.slider(
+            "Noise Strength",
+            min_value=0.0,
+            max_value=1.0,
+            value=0.35,
+            step=0.01,
+            key="inpainting-strength",
+        )
+    with col2:
+        cfg_scale = st.slider(
+            "CFG Scale",
+            min_value=0.0,
+            max_value=20.0,
+            value=11.5,
+            step=0.5,
+            key=f"inpainting-cfg-scale",
+        )
 
     prompt = st.text_input("Input the prompt", key="inpainting-prompt")
 
@@ -127,7 +139,9 @@ def inpainting_section(init_image: Optional[Image.Image] = None):
 
         orig_prompt = prompt
         print("original prompt: ", orig_prompt)
-        prompt = translator.translate(orig_prompt)
+        with st.spinner("Translating prompt..."):
+            prompt = translator.translate(orig_prompt)
+
         if orig_prompt == prompt:
             st.markdown(f"User prompted: `{prompt}`".strip())
             print("prompt is already in English")
@@ -141,6 +155,7 @@ def inpainting_section(init_image: Optional[Image.Image] = None):
                 init_image=init_image,
                 mask_image=mask_image,
                 image_strength=image_strength,
+                cfg_scale=cfg_scale,
             )
         set_inpainted_image(image.copy())
 
@@ -171,7 +186,7 @@ if __name__ == "__main__":
 
     st.divider()
 
-    inpainting_section(init_image)
+    inpainting_section()
     inpainted_image = get_inpainted_image()
     if init_image and inpainted_image:
         st.subheader("Inpainted image")
