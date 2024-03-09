@@ -116,7 +116,7 @@ def inpainting_section():
             "Noise Strength",
             min_value=0.0,
             max_value=1.0,
-            value=0.35,
+            value=0.30,
             step=0.01,
             key="inpainting-strength",
         )
