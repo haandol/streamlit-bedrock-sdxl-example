@@ -113,7 +113,7 @@ def inpainting_section():
     col1, col2 = st.columns(2)
     with col1:
         image_strength = st.slider(
-            "Noise Strength",
+            "Image Strength",
             min_value=0.0,
             max_value=1.0,
             value=0.30,
