@@ -115,10 +115,10 @@ class ImageGenerator:
         prompt: str,
         init_image: Image.Image,
         mask_image: Image.Image,
-        image_strength: float = 0.35,
+        image_strength: float = 0.05,
         negative_prompts: List[str] = [],
-        cfg_scale: int = 12,
-        steps: int = 30,
+        cfg_scale: int = 7.5,
+        steps: int = 20,
         style_preset: str = "photographic",
         width: int = 1024,
     ):

@@ -116,7 +116,7 @@ def inpainting_section():
             "Image Strength",
             min_value=0.0,
             max_value=1.0,
-            value=0.30,
+            value=0.05,
             step=0.01,
             key="inpainting-strength",
         )
@@ -125,7 +125,7 @@ def inpainting_section():
             "CFG Scale",
             min_value=0.0,
             max_value=20.0,
-            value=11.5,
+            value=7.5,
             step=0.5,
             key=f"inpainting-cfg-scale",
         )
